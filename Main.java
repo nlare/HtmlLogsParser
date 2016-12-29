@@ -8,7 +8,9 @@ public class Main {
 
         System.out.println("And a program begun!");
 
-        String pathToLogFiles;
+        String pathToLogFiles = null;
+
+        File[] listLogFiles = new File[10000];
 
         int count_args = 0;
         int path_count = 0;
@@ -39,7 +41,48 @@ public class Main {
 
         }
 
+        int count = 0;
+
+        File folderFile = new File(pathToLogFiles);
+
+        for(final File fileEntry: folderFile.listFiles())   {
+
+            if(fileEntry.isDirectory()) {
+
+                for(final File recurseFile: fileEntry.listFiles())  {
+
+                    if(recurseFile.toString().contains(".htm")) {
+                        
+                        count++;
+                        listLogFiles[count] = recurseFile;
+
+                        System.out.println(listLogFiles[count]);
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        for(final File fileInDir: listLogFiles) {
+
+            try {
+
+                Jsoup.connect(fileInDir.toString()).timeout(0).get();
+
+            } catch (IOException e) {
+
+                e.printStackTrace();
+
+            }
+
+        }
+
+
         System.out.println("The end of a program!");
 
     }
+
 }
