@@ -1,16 +1,21 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import org.jsoup.*;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         System.out.println("And a program begun!");
 
         String pathToLogFiles = null;
 
-        File[] listLogFiles = new File[10000];
+        List<File> listLogFiles = new ArrayList<>();
 
         int count_args = 0;
         int path_count = 0;
@@ -41,8 +46,6 @@ public class Main {
 
         }
 
-        int count = 0;
-
         File folderFile = new File(pathToLogFiles);
 
         for(final File fileEntry: folderFile.listFiles())   {
@@ -52,11 +55,8 @@ public class Main {
                 for(final File recurseFile: fileEntry.listFiles())  {
 
                     if(recurseFile.toString().contains(".htm")) {
-                        
-                        count++;
-                        listLogFiles[count] = recurseFile;
 
-                        System.out.println(listLogFiles[count]);
+                        listLogFiles.add(recurseFile);
 
                     }
 
@@ -66,20 +66,47 @@ public class Main {
 
         }
 
-        for(final File fileInDir: listLogFiles) {
+        for(int i = 0; i < listLogFiles.size(); i++) {
 
-            try {
+            System.out.println(listLogFiles.get(i).toString());
 
-                Jsoup.connect(fileInDir.toString()).timeout(0).get();
+//            File htmlFile = new File(listLogFiles.get(i).toString());
 
-            } catch (IOException e) {
+            String testStr = new String(Files.readAllBytes(Paths.get(listLogFiles.get(i).toString())));
 
-                e.printStackTrace();
+            Document parsedHtml = Jsoup.parse(testStr);
+
+            if(parsedHtml != null)  {
+
+                parsedHtml.text();
+
+            }   else    {
+
+                System.out.println(parsedHtml.text());
+
+            }
+
+            Elements trElements = parsedHtml.getElementsByTag("tr");
+
+            String html = trElements.html();
+
+            if(trElements != null) System.out.println("Parsed!");
+
+            if(trElements != null) {
+
+                for (Element th: trElements) {
+
+                    System.out.println(th.text());
+
+                }
+
+            } else  {
+
+                System.out.println("No any selected element!");
 
             }
 
         }
-
 
         System.out.println("The end of a program!");
 
