@@ -1,11 +1,17 @@
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import org.jsoup.*;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import javax.swing.text.html.parser.Parser;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.jsoup.parser.Parser.htmlParser;
 
 public class Main {
 
@@ -72,39 +78,47 @@ public class Main {
 
 //            File htmlFile = new File(listLogFiles.get(i).toString());
 
-            String testStr = new String(Files.readAllBytes(Paths.get(listLogFiles.get(i).toString())));
+//            String testStr = "<html><head><title>First parse</title></head>" + "<body><p>Parsed HTML into a doc.</p></body></html>";
 
-            Document parsedHtml = Jsoup.parse(testStr);
+            File current_file = new File(listLogFiles.get(i).toString());
+
+//            String testStr = new String(Files.readAllBytes(Paths.get(listLogFiles.get(i).toString())));
+
+//            System.out.println(testStr);
+
+            Document parsedHtml = Jsoup.parse(current_file, "UTF-16");
 
             if(parsedHtml != null)  {
 
-                parsedHtml.text();
+                Elements doc = parsedHtml.getElementsByTag("tr");
 
-            }   else    {
+//                System.out.println("---------------");
+//                System.out.println(text);
+//                System.out.println("---------------");
+//                Elements doc = parsedHtml.select("tr");
 
-                System.out.println(parsedHtml.text());
+                System.out.println(doc.size());
+//                System.out.println("td:" + );
+                if(doc != null) {
 
-            }
+                    for (int j = 0; j < doc.size(); j++) {
 
-            Elements trElements = parsedHtml.getElementsByTag("tr");
+                        System.out.println("---------------");
+                        System.out.println(doc.get(j));
+                        System.out.println("---------------");
 
-            String html = trElements.html();
+                        Document parsedTags = Jsoup.parse(doc.text());
 
-            if(trElements != null) System.out.println("Parsed!");
 
-            if(trElements != null) {
-
-                for (Element th: trElements) {
-
-                    System.out.println(th.text());
+                    }
 
                 }
 
-            } else  {
+                } else  {
 
-                System.out.println("No any selected element!");
+                    System.out.println("No any selected element!");
 
-            }
+                }
 
         }
 
