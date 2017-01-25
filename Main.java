@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.jsoup.parser.Parser.htmlParser;
 
@@ -22,6 +24,10 @@ public class Main {
         String pathToLogFiles = null;
 
         List<File> listLogFiles = new ArrayList<>();
+
+        Event event = new Event();
+
+        Map <Integer, Event> mapEvents = new HashMap<>();
 
         int count_args = 0;
         int path_count = 0;
@@ -72,19 +78,14 @@ public class Main {
 
         }
 
+        int fieldCount = 1;
+        int recordCount = 0;
+
         for(int i = 0; i < listLogFiles.size(); i++) {
 
             System.out.println(listLogFiles.get(i).toString());
 
-//            File htmlFile = new File(listLogFiles.get(i).toString());
-
-//            String testStr = "<html><head><title>First parse</title></head>" + "<body><p>Parsed HTML into a doc.</p></body></html>";
-
             File current_file = new File(listLogFiles.get(i).toString());
-
-//            String testStr = new String(Files.readAllBytes(Paths.get(listLogFiles.get(i).toString())));
-
-//            System.out.println(testStr);
 
             Document parsedHtml = Jsoup.parse(current_file, "UTF-16");
 
@@ -92,26 +93,40 @@ public class Main {
 
                 Elements doc = parsedHtml.getElementsByTag("tr");
 
-//                System.out.println("---------------");
-//                System.out.println(text);
-//                System.out.println("---------------");
-//                Elements doc = parsedHtml.select("tr");
-
-                System.out.println(doc.size());
-//                System.out.println("td:" + );
                 if(doc != null) {
 
-                    for (int j = 0; j < doc.size(); j++) {
+                    Elements html = doc;
 
-                        System.out.println("---------------");
-                        System.out.println(doc.get(j));
-                        System.out.println("---------------");
+                    System.out.println(html.get("td"));
 
-                        Document parsedTags = Jsoup.parse(doc.text());
+                    for (int j = 0; j < html.size(); j++) {
 
+                        Element element = html.get(j);
+
+//                        System.out.println(element.text());
+
+                        if(fieldCount == 1) event.setDate(element.text());
+                        if(fieldCount == 2) event.setUser(element.text());
+                        if(fieldCount == 3) event.setPath(element.text());
+
+                        fieldCount++;
+                        recordCount++;
+
+                        if((j+1) % 3 != 0)    {
+
+                            fieldCount = 1;
+
+                            mapEvents.put(recordCount, event);
+
+                        }
+
+                        for(Map.Entry<Integer, Event> entry: mapEvents.entrySet())  {
+
+//                            System.out.println(entry.getKey() + " : " + entry.getValue().getDate());
+
+                        }
 
                     }
-
                 }
 
                 } else  {
