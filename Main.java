@@ -78,8 +78,9 @@ public class Main {
 
         }
 
-        int fieldCount = 1;
-        int recordCount = 0;
+        int fieldCount = 0;
+
+        List<String> tdTextArray = new ArrayList<>();
 
         for(int i = 0; i < listLogFiles.size(); i++) {
 
@@ -91,42 +92,56 @@ public class Main {
 
             if(parsedHtml != null)  {
 
-                Elements doc = parsedHtml.getElementsByTag("tr");
+                Elements doc = parsedHtml.getElementsByTag("td");
+
+                String docStr = doc.toString();
 
                 if(doc != null) {
 
                     Elements html = doc;
 
-                    System.out.println(html.get("td"));
+                    int recordCount = 0;
 
                     for (int j = 0; j < html.size(); j++) {
 
                         Element element = html.get(j);
 
-//                        System.out.println(element.text());
+                        String tdText = element.text();
 
-                        if(fieldCount == 1) event.setDate(element.text());
-                        if(fieldCount == 2) event.setUser(element.text());
-                        if(fieldCount == 3) event.setPath(element.text());
+                        tdTextArray.add(tdText);
 
-                        fieldCount++;
-                        recordCount++;
+//                        System.out.println(j + " : " + tdTextArray.get(j));
 
-                        if((j+1) % 3 != 0)    {
+                        // List indexes counted from 0
 
-                            fieldCount = 1;
+                        fieldCount += 1;
+
+                        if(fieldCount == 1) event.setDate(tdTextArray.get(j));
+                        if(fieldCount == 2) event.setUser(tdTextArray.get(j));
+                        if(fieldCount == 3) event.setPath(tdTextArray.get(j));
+
+                        if((fieldCount % 3) == 0)    {
+
+//                            System.out.println(j + " : " + fieldCount + " : " + event.getDate() + " : " + event.getUser() + " : " + event.getPath());
+
+                            recordCount += 1;
 
                             mapEvents.put(recordCount, event);
 
-                        }
-
-                        for(Map.Entry<Integer, Event> entry: mapEvents.entrySet())  {
-
-//                            System.out.println(entry.getKey() + " : " + entry.getValue().getDate());
+                            fieldCount = 0;
 
                         }
 
                     }
+
+                    for(Map.Entry<Integer, Event> entry: mapEvents.entrySet())  {
+
+//                        System.out.println(entry.getValue() + " : " + entry.getKey().getDate() + " : " + entry.getKey().getUser() + " : " + entry.getKey().getPath());
+                            System.out.print(entry.getKey() + " : ");
+                            System.out.println(entry.getValue().getPath());
+//
+                    }
+
                 }
 
                 } else  {
