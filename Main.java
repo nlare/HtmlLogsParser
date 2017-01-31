@@ -3,17 +3,12 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.swing.text.html.parser.Parser;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.jsoup.parser.Parser.htmlParser;
 
 public class Main {
 
@@ -21,13 +16,18 @@ public class Main {
 
         System.out.println("And a program begun!");
 
+        long startTime, endTime, millisecToExecute, secToExecute, minToExecute, modulo;
+
+        startTime = System.currentTimeMillis();
+
         String pathToLogFiles = null;
 
         List<File> listLogFiles = new ArrayList<>();
 
-        Event event = new Event();
+        Map <Event, Integer> mapEvents = new HashMap<>();
 
-        Map <Integer, Event> mapEvents = new HashMap<>();
+        long summarySizeOfMap = 0;
+        long countOfLogFiles  = 0;
 
         int count_args = 0;
         int path_count = 0;
@@ -69,6 +69,7 @@ public class Main {
                     if(recurseFile.toString().contains(".htm")) {
 
                         listLogFiles.add(recurseFile);
+                        countOfLogFiles++;
 
                     }
 
@@ -94,13 +95,15 @@ public class Main {
 
                 Elements doc = parsedHtml.getElementsByTag("td");
 
-                String docStr = doc.toString();
-
                 if(doc != null) {
 
                     Elements html = doc;
 
                     int recordCount = 0;
+
+                    String eventDate = new String();
+                    String eventUser = new String();
+                    String eventPath = new String();
 
                     for (int j = 0; j < html.size(); j++) {
 
@@ -110,23 +113,27 @@ public class Main {
 
                         tdTextArray.add(tdText);
 
-//                        System.out.println(j + " : " + tdTextArray.get(j));
-
                         // List indexes counted from 0
 
                         fieldCount += 1;
 
-                        if(fieldCount == 1) event.setDate(tdTextArray.get(j));
-                        if(fieldCount == 2) event.setUser(tdTextArray.get(j));
-                        if(fieldCount == 3) event.setPath(tdTextArray.get(j));
+                        if(fieldCount == 1) eventDate = tdTextArray.get(j);
+                        if(fieldCount == 2) eventUser = tdTextArray.get(j);
+                        if(fieldCount == 3) eventPath = tdTextArray.get(j);
 
                         if((fieldCount % 3) == 0)    {
 
-//                            System.out.println(j + " : " + fieldCount + " : " + event.getDate() + " : " + event.getUser() + " : " + event.getPath());
+                            Event event = new Event();
+
+                            event.setDate(eventDate);
+                            event.setUser(eventUser);
+                            event.setPath(eventPath);
+
+//                            System.out.println(recordCount + " : " + fieldCount + " : " + event.getDate() + " : " + event.getUser() + " : " + event.getPath());
 
                             recordCount += 1;
 
-                            mapEvents.put(recordCount, event);
+                            mapEvents.put(event, recordCount);
 
                             fieldCount = 0;
 
@@ -134,13 +141,9 @@ public class Main {
 
                     }
 
-                    for(Map.Entry<Integer, Event> entry: mapEvents.entrySet())  {
+                    System.out.println("Size of mapEvents: " + mapEvents.size());
 
-//                        System.out.println(entry.getValue() + " : " + entry.getKey().getDate() + " : " + entry.getKey().getUser() + " : " + entry.getKey().getPath());
-                            System.out.print(entry.getKey() + " : ");
-                            System.out.println(entry.getValue().getPath());
-//
-                    }
+                    summarySizeOfMap += mapEvents.size();
 
                 }
 
@@ -151,6 +154,18 @@ public class Main {
                 }
 
         }
+
+        endTime = System.currentTimeMillis();
+
+        millisecToExecute = endTime - startTime;
+
+        secToExecute = millisecToExecute / 1000;
+
+        minToExecute = secToExecute / 60;
+
+//        modulo = secToExecute - minToExecute;
+
+        System.out.println("Time to run: " + minToExecute + "'m " + secToExecute + "'s ; eventsCount: " + summarySizeOfMap + "; Count of log files: " + countOfLogFiles);
 
         System.out.println("The end of a program!");
 
