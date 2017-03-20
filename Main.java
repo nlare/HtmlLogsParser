@@ -27,12 +27,14 @@ public class Main {
 
     private static boolean isAlreadyParsed(String filename)   {
 
-        boolean trigger = true;
+        boolean trigger = false;
         int count = 0;
 
         for (String nameInList: excludeFiles) {
 
             count++;
+
+//            System.out.println("File : " + nameInList);
 
             if (filename.contains(nameInList)) {
 
@@ -40,31 +42,23 @@ public class Main {
 
                 trigger = true;
 
+                break;
+
             }   else    {
 
-                System.out.println("New File : " + filename + " : " + nameInList);
+//                System.out.println("New File : " + filename);
 
                 trigger = false;
 
-                break;
+//                break;
 
             }
 
         }
 
-//        System.out.println("count: " + count);
-
         return trigger;
 
     }
-
-//    private String getExcludedFiles(List<String> list)   {
-//
-//
-//
-//        return
-//
-//    }
 
     public static void main(String[] args) throws IOException, SQLException, ParseException {
 
@@ -128,12 +122,6 @@ public class Main {
 
         Files.lines(pathToFileWithListOfParsedFiles).forEach(s -> excludeFiles.add(s));
 
-        for (String file: excludeFiles) {
-
-            System.out.println(file);
-
-        }
-
         File folderFile = new File(pathToLogFiles);
 
         for(final File fileEntry: folderFile.listFiles())   {
@@ -145,6 +133,8 @@ public class Main {
                     if(recurseFile.toString().contains(".htm")) {
                         // Проверяем присутствие файла в уже распарсенных ранее, которые записаны в файл .parsed_files и коллекцию excludeFiles
                         if(!(isAlreadyParsed(recurseFile.toString()))) {
+
+                            System.out.println("Added: " + filename);
 
                             listLogFiles.add(recurseFile);
                             countOfLogFiles++;
@@ -170,19 +160,6 @@ public class Main {
             }
 
         }
-
-//        for (String nameOfFile: listOfParsedFiles) {
-
-//            System.out.println(nameOfFile);
-
-//            File FileWithlistOfParsedFiles = new File(".parsed_files");
-
-//            Path pathToFileWithListOfParsedFiles = Paths.get(".parsed_files");
-
-//            Files.write(pathToFileWithListOfParsedFiles, nameOfFile, Charset.forName("UTF-8"));
-
-//        }
-
 
         if(!(listOfParsedFiles.isEmpty())) {
             // Путь до файла, в который будем писать список уже прочитанных
@@ -261,11 +238,12 @@ public class Main {
                                     event.setUser(eventUser);
                                     event.setPath(eventPath);
 
-//                            System.out.println(recordCount + " : " + fieldCount + " : " + event.getDate() + " : " + event.getUser() + " : " + event.getPath());
+      //                            System.out.println(recordCount + " : " + fieldCount + " : " + event.getDate() + " : " + event.getUser() + " : " + event.getPath());
 
                                     recordCount += 1;
 
                                     allRecordsCount += 1;
+
                                     if (recordCount % 1000 == 0) {
 
                                         System.out.print(".");
@@ -273,9 +251,9 @@ public class Main {
 
                                     }
 
-//                            mapEvents.put(event, recordCount);
+      //                            mapEvents.put(event, recordCount);
 
-//                                    db_connection.addToDatabase(eventUser, eventPath, eventDate);
+                                    db_connection.addToDatabase(eventUser, eventPath, eventDate);
 
                                 }
 
