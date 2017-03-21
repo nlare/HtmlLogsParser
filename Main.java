@@ -3,15 +3,21 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.*;
+
+import static java.nio.file.StandardOpenOption.APPEND;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 public class Main {
 
@@ -134,23 +140,27 @@ public class Main {
                         // Проверяем присутствие файла в уже распарсенных ранее, которые записаны в файл .parsed_files и коллекцию excludeFiles
                         if(!(isAlreadyParsed(recurseFile.toString()))) {
 
-                            System.out.println("Added: " + filename);
+                            if(!(recurseFile.toString().equals(""))) {
 
-                            listLogFiles.add(recurseFile);
-                            countOfLogFiles++;
+                                System.out.println("Added: " + recurseFile.toString());
 
-                            {
+                                listLogFiles.add(recurseFile);
 
-                                buffer = recurseFile.toString();
+                                countOfLogFiles++;
 
-                                String[] dividedFilenamesBySlash = buffer.split(delimiters);
+                                {
 
-                                filename = dividedFilenamesBySlash[dividedFilenamesBySlash.length - 1];
+                                    buffer = recurseFile.toString();
 
-                                listOfParsedFiles.add(filename);
+                                    String[] dividedFilenamesBySlash = buffer.split(delimiters);
+
+                                    filename = dividedFilenamesBySlash[dividedFilenamesBySlash.length - 1];
+
+                                    listOfParsedFiles.add(filename);
+
+                                }
 
                             }
-
                         }
 
                     }
@@ -161,14 +171,74 @@ public class Main {
 
         }
 
-        if(!(listOfParsedFiles.isEmpty())) {
-            // Путь до файла, в который будем писать список уже прочитанных
+        final String pathToFileWithListOfParsedFilesString = ".parsed_files";
+        // Заведем определение файла
+        File FileWithListOfParsedFiles = new File(pathToFileWithListOfParsedFilesString);
 
-            // Запишем в файл список уже прочитанных файлов
-            Files.write(pathToFileWithListOfParsedFiles, listOfParsedFiles, Charset.forName("UTF-8"));
+        // Запишем в файл список уже прочитанных файлов
+        if(!(listOfParsedFiles.isEmpty())) {
+            // pathToFileWithListOfParsedFiles - переменная типа Path, путь до файла, в который будем писать список
+            //            Files.write(pathToFileWithListOfParsedFiles, listOfParsedFiles, Charset.forName("UTF-8"), EnumSet.of(APPEND));
+
+            // Для записи в файл с флагом APPEND (второй параметр конструктора)
+            FileWriter parsedFilesWriter = new FileWriter(FileWithListOfParsedFiles.getAbsoluteFile(),true);
+
+            System.out.println("Filepath: " + FileWithListOfParsedFiles.getAbsoluteFile());
+            //Если файл не существует - создадим файл
+            if(!(FileWithListOfParsedFiles.exists()))  {
+
+                FileWithListOfParsedFiles.createNewFile();
+                System.out.println("Create file with name: " + FileWithListOfParsedFiles.getAbsoluteFile());
+
+            }
+            // Буферезированная запись
+            BufferedWriter parsedFilesBufferedWriter = new BufferedWriter(parsedFilesWriter);
+
+            for(String parsedFiles: listOfParsedFiles)  {
+
+                try {
+
+                    parsedFilesBufferedWriter.write(parsedFiles);
+                    System.out.println("Block of try");
+
+                } catch(Exception e)   {
+
+                    System.out.println("Cannot write (append) to file!");
+
+                }   finally {
+
+                    try {
+                        // Сперва нужно закрыть BufferWriter
+                        if(parsedFilesBufferedWriter != null)   {
+
+                            System.out.println("Close BufferedFileWriter.");
+                            parsedFilesBufferedWriter.close();
+
+                        }
+                        // А только потом FileWriter!
+                        if(parsedFilesWriter != null) {
+
+                            System.out.println("Close FileWriter.");
+                            parsedFilesWriter.close();
+
+                        }
+                        // Иначе не запишет
+
+                    }   catch(Exception e) {
+
+                        System.out.println("FileWriter and BufferedFileWriter:" + e);
+
+                    }
+
+                }
+
+                System.out.println("Write: " + parsedFiles);
+
+            }
+
         }
 
-        System.out.println("!----------------------------------------------------------------------!");
+        System.out.println("-----------------------------------------!");
 
         int fieldCount = 0;
         int allRecordsCount = 0;
@@ -176,6 +246,8 @@ public class Main {
         db_connection.connectToDB();
 
         List<String> tdTextArray = new ArrayList<>();
+
+        System.out.println("Size of listLogFiles: " + listLogFiles.size());
 
         for(int i = 0; i < listLogFiles.size(); i++) {
 
@@ -228,9 +300,9 @@ public class Main {
 
                         if((fieldCount % 3) == 0)    {
 
-                            if((!Objects.equals(eventUser, excludedNames[0])) && (!Objects.equals(eventUser, excludedNames[1])) && (!Objects.equals(eventUser, excludedNames[2])) && (!Objects.equals(eventUser, excludedNames[3])) && (!Objects.equals(eventUser, excludedNames[4]))) {
+//                            if((!Objects.equals(eventUser, excludedNames[0])) && (!Objects.equals(eventUser, excludedNames[1])) && (!Objects.equals(eventUser, excludedNames[2])) && (!Objects.equals(eventUser, excludedNames[3])) && (!Objects.equals(eventUser, excludedNames[4]))) {
 
-                                if (!(eventUser.contains(excludedFiles[0]))) {
+//                                if (!(eventUser.contains(excludedFiles[0]))) {
 
                                     Event event = new Event();
 
@@ -238,7 +310,7 @@ public class Main {
                                     event.setUser(eventUser);
                                     event.setPath(eventPath);
 
-      //                            System.out.println(recordCount + " : " + fieldCount + " : " + event.getDate() + " : " + event.getUser() + " : " + event.getPath());
+//                                  System.out.println(recordCount + " : " + fieldCount + " : " + event.getDate() + " : " + event.getUser() + " : " + event.getPath());
 
                                     recordCount += 1;
 
@@ -253,17 +325,30 @@ public class Main {
 
       //                            mapEvents.put(event, recordCount);
 
-                                    db_connection.addToDatabase(eventUser, eventPath, eventDate);
+//                                    db_connection.commitToDB();
 
-                                }
 
-                                fieldCount = 0;
-
-                                } else {
+//                                }
 
                                     fieldCount = 0;
 
-                                }
+//                                    try {
+
+//                                        db_connection.addToDatabase(eventUser, eventPath, eventDate);
+
+//                                        db_connection.commitToDB();
+
+//                                    }   catch(SQLException e)   {
+//
+//                                        System.out.println("SQL ERROR! " + e);
+//
+//                                    }
+//
+//                                } else {
+//
+//                                    fieldCount = 0;
+//
+//                                }
                         }
 
 
@@ -278,20 +363,19 @@ public class Main {
 
                 }
 
-                } else  {
+                } else {
 
                     System.out.println("No any selected element!");
 
                 }
-
-
-//                if(i > 2) break;
 
         }
 
         try {
 
             db_connection.commitToDB();
+
+            System.out.println("Commited!");
 
         }   catch(Exception e) {
 
