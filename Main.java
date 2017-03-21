@@ -320,7 +320,6 @@ public class Main {
 
                                         System.out.print(".");
 
-
                                     }
 
       //                            mapEvents.put(event, recordCount);
@@ -371,17 +370,17 @@ public class Main {
 
         }
 
-        try {
+//        try {
 
-            db_connection.commitToDB();
+//            db_connection.commitToDB();
 
-            System.out.println("Commited!");
+//            System.out.println("Commited!");
 
-        }   catch(Exception e) {
+//        }   catch(Exception e) {
 
-            System.out.println("Commit Error!");
+//            System.out.println("Commit Error!");
 
-        }
+//        }
 
         endTime = System.currentTimeMillis();
 
